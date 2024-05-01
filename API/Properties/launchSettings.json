@@ -1,0 +1,26 @@
+{
+  "profiles": {
+    "IMDBProvider": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ScraperConfiguration__Provider": "IMDb"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5157"
+    },
+    "AnotherProvider": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ScraperConfiguration__Provider": "MockProvider"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5157"
+    }
+  }
+}
