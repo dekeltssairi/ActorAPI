@@ -9,8 +9,22 @@ namespace API.Extensions
     {
         public static IServiceCollection AddScraper(this IServiceCollection services, IConfiguration configuration)
         {
-            var config = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
+
+
+
+            ScraperConfiguration config = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
                 ?? throw new ArgumentNullException("Failed to parse ScraperConfiguration");
+
+            //services.AddScoped(sp =>
+            //{
+            //    switch (config)
+            //    {
+            //        default:
+            //            break;
+            //    }
+            //});
+
+
 
             var scraperAssembly = Assembly.Load("Infrastructure");
 

@@ -13,7 +13,7 @@ namespace Infrastructure
             _actorContext = actorContext;
         }
 
-        public async Task<IEnumerable<Actor>> GetActorsAsync(string? name, int? rankStart, int? rankEnd, int pageNumber, int pageSize)
+        public async Task<IEnumerable<Actor>> GetActorsAsync(string? name, int? rankStart, int? rankEnd, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             IQueryable<Actor> query = _actorContext.Actors;
 
@@ -31,24 +31,24 @@ namespace Infrastructure
                 .OrderBy(a => a.Rank) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<Actor?> GetActorByRankAsync(int rank)
+        public async Task<Actor?> GetActorByRankAsync(int rank, CancellationToken cancellationToken)
         {
-            return await _actorContext.Actors.FirstOrDefaultAsync(a => a.Rank == rank);
+            return await _actorContext.Actors.SingleOrDefaultAsync(a => a.Rank == rank, cancellationToken);
         }
 
-        public async Task AddActorAsync(Actor actor)
+        public async Task AddActorAsync(Actor actor, CancellationToken cancellationToken)
         {
             _actorContext.Actors.Add(actor);
-            await _actorContext.SaveChangesAsync();
+            await _actorContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateActorAsync(Actor actor)
+        public async Task UpdateActorAsync(Actor actor, CancellationToken cancellationToken)
         {
             _actorContext.Actors.Update(actor);
-            await _actorContext.SaveChangesAsync();
+            await _actorContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task AddActorsAsync(IEnumerable<Actor> actors)
@@ -57,11 +57,13 @@ namespace Infrastructure
             await _actorContext.SaveChangesAsync();
         }
 
-        public async Task <Actor?> DeleteActorAsync(Guid actorId)
+        public async Task <Actor?> DeleteActorAsync(Guid actorId, CancellationToken cancellationToken)
         {
-            Actor? actor = _actorContext.Actors.Find(actorId);
-            
-           if (actor != null)
+            Actor? actor = await _actorContext.Actors
+                .Where(a => a.Id == actorId)
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (actor != null)
             {
                 _actorContext.Actors.Remove(actor);
                 await _actorContext.SaveChangesAsync();
@@ -70,9 +72,9 @@ namespace Infrastructure
             return actor;
         }
 
-        public async Task<Actor?> GetActorByIdAsync(Guid actorId)
+        public async Task<Actor?> GetActorByIdAsync(Guid actorId, CancellationToken cancellationToken)
         {
-            return await _actorContext.Actors.FirstOrDefaultAsync(a => a.Id == actorId);
+            return await _actorContext.Actors.SingleOrDefaultAsync(a => a.Id == actorId);
         }
     }
 
