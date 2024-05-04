@@ -1,7 +1,8 @@
 ﻿using Domain.Abstractions;
-using Infrastructure.Attributes;
 using Infrastructure.Configurations;
-using System.Reflection;
+using Infrastructure.MovieScrapers;
+using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Extensions
 {
@@ -9,47 +10,41 @@ namespace API.Extensions
     {
         public static IServiceCollection AddScraper(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddOptions<ScraperConfiguration>()
+                .Bind(configuration.GetSection("ScraperConfiguration"))
+                .ValidateDataAnnotations();
 
-
-
-            ScraperConfiguration config = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
+            ScraperConfiguration scraperConfig = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
                 ?? throw new ArgumentNullException("Failed to parse ScraperConfiguration");
 
-            //services.AddScoped(sp =>
-            //{
-            //    switch (config)
-            //    {
-            //        default:
-            //            break;
-            //    }
-            //});
+            ValidateConfiguration(scraperConfig);
 
-
-
-            var scraperAssembly = Assembly.Load("Infrastructure");
-
-            var scraperType = scraperAssembly.GetTypes()
-                .First(t => typeof(ScraperBase).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract &&
-                                     t.GetCustomAttribute<ScraperAttribute>()?.ProviderName.Equals(config.Provider, StringComparison.OrdinalIgnoreCase) == true);
-
-            ScraperAttribute? scraperAttribute = scraperType.GetCustomAttribute<ScraperAttribute>();
-
-            services.AddHttpClient(scraperType.Name, client =>
+            //Consider to extract to Factory for more flexability instead of register a single Scraper
+            switch (scraperConfig.Provider)
             {
-                client.BaseAddress = scraperAttribute!.BaseUri;
-                client.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-" + scraperType.Name);
-            });
-
-            if (scraperType != null)
-            {
-                services.AddScoped(typeof(ScraperBase), scraperType);
-            }
-            else
-            {
-                throw new KeyNotFoundException($"No scraper found for provider: {config.Provider}");
+                case "IMDb":
+                    services.AddScoped<IScraper, IMDbScraper>();
+                    break;
+                case "MockProvider":
+                    services.AddScoped<IScraper, MockScraper>();
+                    break;
+                default:
+                    throw new Exception($"No scraper found for provider: {scraperConfig.Provider}");
             }
 
             return services;
+        }
+
+        private static void ValidateConfiguration(ScraperConfiguration config)
+        {
+            var validationContext = new ValidationContext(config);
+            var validationResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(config, validationContext, validationResults, true))
+            {
+                var errorMessages = string.Join(", ", validationResults.Select(vr => vr.ErrorMessage));
+                throw new ArgumentException($"Invalid ScraperConfiguration: {errorMessages}");
+            }
         }
     }
 }

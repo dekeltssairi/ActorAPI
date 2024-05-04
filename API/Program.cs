@@ -13,7 +13,6 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
-builder.Services.Configure<ScraperConfiguration>(builder.Configuration.GetSection("ScraperConfiguration"));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -34,7 +33,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<ActorController>();
-
+builder.Services.AddHttpClient();
 var app = builder.Build();
 app.UseMiddleware<ExceptionResponseMiddleware>();
 app.UseMiddleware<ExceptionLoggingMiddleware>();
@@ -42,7 +41,7 @@ app.UseMiddleware<ExceptionLoggingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
-    var scraper = scope.ServiceProvider.GetRequiredService<ScraperBase>();
+    var scraper = scope.ServiceProvider.GetRequiredService<IScraper>();
     await scraper.ScrapeActorsAsync(); 
 }
 

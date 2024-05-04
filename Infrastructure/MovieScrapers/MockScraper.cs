@@ -1,17 +1,17 @@
 ﻿using Domain.Abstractions;
-using Infrastructure.Attributes;
+using Infrastructure.Configurations;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.MovieScrapers
 {
-    [Scraper("MockProvider", "https://www.mock.com")]
-    internal class MockScraper : ScraperBase
+    public class MockScraper : IScraper
     {
-        public MockScraper(ILogger<MockScraper> logger, IHttpClientFactory httpClientFactory, IActorRepository actorRepository) : base(logger, httpClientFactory, actorRepository)
+        public MockScraper(ILogger<MockScraper> logger, IOptions<ScraperConfiguration> options, IHttpClientFactory httpClientFactory, IActorRepository actorRepository)
         {
         }
 
-        public override Task ScrapeActorsAsync()
+        public Task ScrapeActorsAsync()
         {
             throw new NotImplementedException();
         }

@@ -1,29 +1,30 @@
 ﻿using Domain.Abstractions;
 using Domain.Entities;
 using HtmlAgilityPack;
-using Infrastructure.Attributes;
+using Infrastructure.Configurations;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Options;
 using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.MovieScrapers
 {
-    [Scraper("IMDb", "https://www.imdb.com")]
-    internal class IMDbScraper : ScraperBase
+    public class IMDbScraper : IScraper
     {
-        public IMDbScraper(ILogger<IMDbScraper> logger,  IHttpClientFactory httpClientFactory, IActorRepository actorRepository) :
-            base(logger ,httpClientFactory, actorRepository)
-        { }
-
-        public override async Task ScrapeActorsAsync()
+        private readonly ILogger _logger;
+        private readonly string _url;
+        private readonly HttpClient _httpClient;
+        private readonly IActorRepository _actorRepository;
+        public IMDbScraper(ILogger<IMDbScraper> logger, IOptions<ScraperConfiguration> scraperConfiguration,  IHttpClientFactory httpClientFactory, IActorRepository actorRepository)
         {
-            var url = "/list/ls054840033/";
-            var html = await _httpClient.GetStringAsync(url);
+            _logger = logger;
+            _url = scraperConfiguration.Value.Uri;
+            _actorRepository = actorRepository;
+            _httpClient = httpClientFactory.CreateClient();
+        }
+
+        public async Task ScrapeActorsAsync()
+        {
+            var html = await _httpClient.GetStringAsync(_url);
             var actors = ParseActors(html);
             await _actorRepository.AddActorsAsync(actors);
         }
