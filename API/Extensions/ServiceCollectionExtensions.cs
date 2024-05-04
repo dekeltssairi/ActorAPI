@@ -22,10 +22,10 @@ namespace API.Extensions
             //Consider to extract to Factory for more flexability instead of register a single Scraper
             switch (scraperConfig.Provider)
             {
-                case "IMDb":
-                    services.AddScoped<IScraper, IMDbScraper>();
+                case ScraperProvider.IMDb:
+                    services.AddScoped<IScraper, IMDbActorScraper>();
                     break;
-                case "MockProvider":
+                case ScraperProvider.MockProvider:
                     services.AddScoped<IScraper, MockScraper>();
                     break;
                 default:

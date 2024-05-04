@@ -11,7 +11,7 @@ namespace Infrastructure.MovieScrapers
         {
         }
 
-        public Task ScrapeActorsAsync()
+        public Task ScrapeAsync()
         {
             throw new NotImplementedException();
         }

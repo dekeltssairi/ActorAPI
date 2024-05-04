@@ -8,13 +8,13 @@ using System.Net;
 
 namespace Infrastructure.MovieScrapers
 {
-    public class IMDbScraper : IScraper
+    public class IMDbActorScraper : IScraper
     {
         private readonly ILogger _logger;
         private readonly string _url;
         private readonly HttpClient _httpClient;
         private readonly IActorRepository _actorRepository;
-        public IMDbScraper(ILogger<IMDbScraper> logger, IOptions<ScraperConfiguration> scraperConfiguration,  IHttpClientFactory httpClientFactory, IActorRepository actorRepository)
+        public IMDbActorScraper(ILogger<IMDbActorScraper> logger, IOptions<ScraperConfiguration> scraperConfiguration,  IHttpClientFactory httpClientFactory, IActorRepository actorRepository)
         {
             _logger = logger;
             _url = scraperConfiguration.Value.Uri;
@@ -22,7 +22,7 @@ namespace Infrastructure.MovieScrapers
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        public async Task ScrapeActorsAsync()
+        public async Task ScrapeAsync()
         {
             var html = await _httpClient.GetStringAsync(_url);
             var actors = ParseActors(html);

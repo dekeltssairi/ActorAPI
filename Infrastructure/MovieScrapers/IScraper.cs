@@ -4,6 +4,6 @@ namespace Domain.Abstractions
 {
     public interface IScraper
     {
-        Task ScrapeActorsAsync();
+        Task ScrapeAsync();
     }
 }

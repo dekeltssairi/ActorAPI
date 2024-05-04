@@ -42,7 +42,7 @@ app.UseMiddleware<ExceptionLoggingMiddleware>();
 using (var scope = app.Services.CreateScope())
 {
     var scraper = scope.ServiceProvider.GetRequiredService<IScraper>();
-    await scraper.ScrapeActorsAsync(); 
+    await scraper.ScrapeAsync(); 
 }
 
 if (app.Environment.IsDevelopment())
