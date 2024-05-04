@@ -23,7 +23,7 @@ namespace Application
             
             if (actorWithSameRank != null)
             {
-                throw new UniqueConstraintViolationException($"An actor with rank {actorCreateDto.Rank} already exists.");
+                throw new ConflictException($"An actor with rank {actorCreateDto.Rank} already exists.");
             }
 
             Actor actor = _mapper.Map<Actor>(actorCreateDto);
@@ -39,7 +39,8 @@ namespace Application
         {
             Actor? deletedAactor = await _actorRepository.DeleteActorAsync(actorId);
 
-            if (deletedAactor == null) return null;
+            if (deletedAactor == null)
+                throw new NotFoundException($"No actor found with ID {actorId}");
 
             return _mapper.Map<ActorDTO>(deletedAactor);
         }
@@ -48,7 +49,9 @@ namespace Application
         {
             Actor? actor = await _actorRepository.GetActorByIdAsync(actorId);
 
-            if (actor == null) return null;
+            if (actor == null)
+                throw new NotFoundException($"No actor found with ID {actorId}");
+
 
             return _mapper.Map<ActorDTO>(actor);
         }
@@ -64,14 +67,14 @@ namespace Application
             Actor? existingActor = await _actorRepository.GetActorByIdAsync(id);
             if (existingActor == null)
             {
-                throw new KeyNotFoundException($"No actor found with ID {id}");
+                throw new NotFoundException($"No actor found with ID {id}");
             }
 
             var actorWithSameRank = await _actorRepository.GetActorByRankAsync(actorUpdateDto.Rank);
             
             if (actorWithSameRank != null && actorWithSameRank.Id != id)
             {
-                throw new UniqueConstraintViolationException($"Another actor with rank {actorUpdateDto.Rank} already exists.");
+                throw new ConflictException($"Another actor with rank {actorUpdateDto.Rank} already exists.");
             }
 
             _mapper.Map(actorUpdateDto, existingActor);

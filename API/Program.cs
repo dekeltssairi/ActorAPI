@@ -1,5 +1,6 @@
 using API.Controllers;
 using API.Extensions;
+using API.Middlewares;
 using Application;
 using Application.AutoMapper;
 using Domain.Abstractions;
@@ -35,7 +36,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSwaggerExamplesFromAssemblyOf<ActorController>();
 
 var app = builder.Build();
-
+app.UseMiddleware<ExceptionResponseMiddleware>();
+app.UseMiddleware<ExceptionLoggingMiddleware>();
 using (var scope = app.Services.CreateScope())
 {
     var scraper = scope.ServiceProvider.GetRequiredService<ScraperBase>();

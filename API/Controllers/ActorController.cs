@@ -4,6 +4,7 @@ using Application.DTO;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
+using API.Attributes;
 
 namespace API.Controllers
 {
@@ -38,18 +39,11 @@ namespace API.Controllers
         [ProducesResponseType(typeof(IEnumerable<ActorBasicDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(GetActorsResponseExample))]
+        [LogOnError("Error retrieving actors.")]
         public async Task<ActionResult<IEnumerable<ActorBasicDTO>>> GetActors([FromQuery] ActorQueryDTO queryDto)
         { 
-            try
-            {
-                var actors = await _actorService.GetAllActorsAsync(queryDto);
-                return Ok(actors);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving actors.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            var actors = await _actorService.GetAllActorsAsync(queryDto);
+            return Ok(actors);
         }
 
 
@@ -73,24 +67,11 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(GetActorByIdResponseExample))]
         [HttpGet("{id}", Name = "GetActorById")]
+        [LogOnError("Error retrieving actors.")]
         public async Task<ActionResult<ActorDTO>> GetActorById(Guid id)
         {
-            try
-            {
-                var actor = await _actorService.GetActorByIdAsync(id);
-                if (actor == null)
-                {
-                    return NotFound($"Actor with ID {id} not found.");
-                }
-
-                return Ok(actor);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving actor.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-
+            var actor = await _actorService.GetActorByIdAsync(id);
+            return Ok(actor);
         }
 
         /// <summary>
@@ -106,22 +87,11 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerRequestExample(typeof(ActorCreateDTO), typeof(AddActorRequestExample))]
         [SwaggerResponseExample(StatusCodes.Status201Created, typeof(AddActorResponseExample))]
+        [LogOnError("Error adding actor.")]
         public async Task<ActionResult<ActorDTO>> AddActor([FromBody] ActorCreateDTO actorDto)
         {
-            try
-            {
-                var addedActor = await _actorService.AddActorAsync(actorDto);
-                return CreatedAtAction(nameof(GetActorById), new { id = addedActor.Id }, addedActor);
-            }
-            catch (UniqueConstraintViolationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding actor.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            var addedActor = await _actorService.AddActorAsync(actorDto);
+            return CreatedAtAction(nameof(GetActorById), new { id = addedActor.Id }, addedActor);
         }
 
         /// <summary>
@@ -154,28 +124,11 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(UpdateActorResponseExample))]
+        [LogOnError("Error updating actor.")]
         public async Task<ActionResult<ActorDTO>> UpdateActor(Guid id, [FromBody] ActorUpdateDTO actorUpdateDto)
         {
-            try
-            {
-                var updatedActor = await _actorService.UpdateActorAsync(id, actorUpdateDto);
-                
-                if (updatedActor == null)
-                {
-                    return NotFound($"Actor with ID {id} not found.");
-                }
-
-                return Ok(updatedActor);
-            }
-            catch (UniqueConstraintViolationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating actor.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            var updatedActor = await _actorService.UpdateActorAsync(id, actorUpdateDto);
+            return Ok(updatedActor);
         }
 
         /// <summary>
@@ -197,24 +150,11 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [LogOnError("Error deleting actor.")]
         public async Task<IActionResult> DeleteActor(Guid id)
         {
-            try
-            {
-                ActorDTO? deletedActor = await _actorService.DeleteActorAsync(id);
-
-                if (deletedActor == null)
-                {
-                    return NotFound($"Actor with ID {id} not found.");
-                }
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting actor.");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            ActorDTO? deletedActor = await _actorService.DeleteActorAsync(id);
+            return NoContent();
         }
     }
 }

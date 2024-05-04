@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    public class UniqueConstraintViolationException : Exception
+    public class NotFoundException : Exception
     {
-        public UniqueConstraintViolationException(string message)
+        public NotFoundException(string message)
             : base(message)
         {
         }
