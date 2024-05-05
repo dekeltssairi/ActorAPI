@@ -1,8 +1,10 @@
 ﻿using Domain.Abstractions;
+using Infrastructure.Attributes;
 using Infrastructure.Configurations;
 using Infrastructure.MovieScrapers;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace API.Extensions
 {
@@ -14,37 +16,29 @@ namespace API.Extensions
                 .Bind(configuration.GetSection("ScraperConfiguration"))
                 .ValidateDataAnnotations();
 
-            ScraperConfiguration scraperConfig = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
+            ScraperConfiguration config = configuration.GetSection("ScraperConfiguration").Get<ScraperConfiguration>()
                 ?? throw new ArgumentNullException("Failed to parse ScraperConfiguration");
 
-            ValidateConfiguration(scraperConfig);
 
-            //Consider to extract to Factory or register all Scrapers for more flexability (instead of register a single Scraper)
-            switch (scraperConfig.Provider)
+            var scraperAssembly = Assembly.Load("Infrastructure");
+
+            var scraperType = scraperAssembly.GetTypes()
+                .First(t => typeof(IScraper).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract &&
+                                     t.GetCustomAttribute<ScraperAttribute>()?.ProviderName == config.Provider);
+
+            ScraperAttribute? scraperAttribute = scraperType.GetCustomAttribute<ScraperAttribute>();
+
+
+            if (scraperType != null)
             {
-                case ScraperProvider.IMDb:
-                    services.AddScoped<IScraper, IMDbActorScraper>();
-                    break;
-                case ScraperProvider.MockProvider:
-                    services.AddScoped<IScraper, MockScraper>();
-                    break;
-                default:
-                    throw new Exception($"No scraper found for provider: {scraperConfig.Provider}");
+                services.AddScoped(typeof(IScraper), scraperType);
+            }
+            else
+            {
+                throw new KeyNotFoundException($"No scraper found for provider: {config.Provider}");
             }
 
             return services;
-        }
-
-        private static void ValidateConfiguration(ScraperConfiguration config)
-        {
-            var validationContext = new ValidationContext(config);
-            var validationResults = new List<ValidationResult>();
-
-            if (!Validator.TryValidateObject(config, validationContext, validationResults, true))
-            {
-                var errorMessages = string.Join(", ", validationResults.Select(vr => vr.ErrorMessage));
-                throw new ArgumentException($"Invalid ScraperConfiguration: {errorMessages}");
-            }
         }
     }
 }

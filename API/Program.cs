@@ -23,6 +23,7 @@ builder.Services.AddDbContext<ActorContext>(options =>
 builder.Services.AddScoped<IActorRepository, ActorRepository>();
 builder.Services.AddScoped<IActorService, ActorService>();
 builder.Services.AddAutoMapper(typeof(ActorProfile));
+builder.Services.AddHttpClient();
 builder.Services.AddScraper(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>

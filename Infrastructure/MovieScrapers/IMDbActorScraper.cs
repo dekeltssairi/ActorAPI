@@ -1,6 +1,7 @@
 ﻿using Domain.Abstractions;
 using Domain.Entities;
 using HtmlAgilityPack;
+using Infrastructure.Attributes;
 using Infrastructure.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,7 @@ using System.Net;
 
 namespace Infrastructure.MovieScrapers
 {
+    [Scraper("IMDb")]
     public class IMDbActorScraper : IScraper
     {
         private readonly ILogger _logger;
