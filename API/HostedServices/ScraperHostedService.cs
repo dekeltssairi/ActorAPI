@@ -15,7 +15,6 @@ namespace API.HostedServices
         {
             using var scope = _serviceProvider.CreateScope();
             var scraper = scope.ServiceProvider.GetRequiredService<IScraper>();
-            await Task.Delay(100000);
             await scraper.ScrapeAsync();
         }
 
