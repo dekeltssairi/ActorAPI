@@ -9,7 +9,7 @@ using API.Attributes;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/actors")]
     public class ActorController : ControllerBase
     {
         private readonly ILogger<ActorController> _logger;
