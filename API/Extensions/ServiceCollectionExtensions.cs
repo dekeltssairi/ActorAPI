@@ -19,7 +19,7 @@ namespace API.Extensions
 
             ValidateConfiguration(scraperConfig);
 
-            //Consider to extract to Factory for more flexability instead of register a single Scraper
+            //Consider to extract to Factory or register all Scrapers for more flexability (instead of register a single Scraper)
             switch (scraperConfig.Provider)
             {
                 case ScraperProvider.IMDb:
