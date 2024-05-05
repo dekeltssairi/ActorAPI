@@ -1,5 +1,6 @@
 using API.Controllers;
 using API.Extensions;
+using API.HostedServices;
 using API.Middlewares;
 using Application;
 using Application.AutoMapper;
@@ -35,16 +36,11 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<ActorController>();
 builder.Services.AddHttpClient();
+builder.Services.AddHostedService<ScraperHostedService>();
+
 var app = builder.Build();
 app.UseMiddleware<ExceptionResponseMiddleware>();
 app.UseMiddleware<ExceptionLoggingMiddleware>();
-
-
-using (var scope = app.Services.CreateScope())
-{
-    var scraper = scope.ServiceProvider.GetRequiredService<IScraper>();
-    await scraper.ScrapeAsync(); 
-}
 
 if (app.Environment.IsDevelopment())
 {
